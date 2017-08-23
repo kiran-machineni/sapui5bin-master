@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta charset="UTF-8">
+
+        <title>Mock Server - Basic Test</title>
+
+        <script id="sap-ui-bootstrap" 
+                type="text/javascript"
+                src="/sapui5/latest/libs/resources/sap-ui-core.js"
+                data-sap-ui-theme="sap_bluecrystal"
+                data-sap-ui-libs="sap.m"
+                data-sap-ui-xx-bindingSyntax="complex"
+        >
+        </script>
+
+        <script>
+
+        jQuery.sap.require("sap.ui.core.util.MockServer");
+        var oMockServer = new sap.ui.core.util.MockServer({
+            rootUri: "http://localhost/qmacro",
+            requests: [
+                {
+                    method: "GET",
+                    path: "/test",
+                    response: function(oXhr) {
+                        oXhr.respond(
+                            200,
+                            {
+                                "Content-Type": "application/json"
+                            },
+                            '{"greeting": "Hello World"}'
+                        )
+                    }
+                },
+                {
+                    method: "GET",
+                    path: "/identifier/:id",
+                    response: function(oXhr, sId) {
+                        oXhr.respond(
+                            200,
+                            {
+                                "Content-Type": "application/json"
+                            },
+                            JSON.stringify({identifier: sId})
+                        )
+                    }
+                },
+                {
+                    method: "GET",
+                    path: "/customer/([A-Z][0-9]+)/orders",
+                    response: function(oXhr, sCustomer) {
+                        oXhr.respond(
+                            200,
+                            {
+                                "Content-Type": "application/json"
+                            },
+                            JSON.stringify({customer: sCustomer})
+                        )
+                    }
+                },
+            ]
+        });
+
+        oMockServer.start();
+
+        // Simple fixed URL
+        new sap.m.Button({
+            text: "Press me",
+            press: function(oEvent) {
+                var oRes = jQuery.sap.sjax({
+                    url: "http://localhost/qmacro/test",
+                    dataType: "json"
+                });
+                var mData = oRes.data;
+                oEvent.getSource().setText(mData.greeting);
+            }
+        }).placeAt("content");
+
+        // URL with parameter
+        new sap.m.Button({
+            text: "Parameter test",
+            press: function(oEvent) {
+                var oRes = jQuery.sap.sjax({
+                    url: "http://localhost/qmacro/identifier/p1",
+                    dataType: "json"
+                });
+                var mData = oRes.data;
+                oEvent.getSource().setText("Parameter was " + mData.identifier);
+            }
+        }).placeAt("content");
+
+        // URL with regex matcher
+        new sap.m.Button({
+            text: "Regex test - pass",
+            press: function(oEvent) {
+                var oRes = jQuery.sap.sjax({
+                    url: "http://localhost/qmacro/customer/T1729/orders",
+                    dataType: "json"
+                });
+                var sResult = oRes.success ? "Customer was " + oRes.data.customer : "Call failed";
+                oEvent.getSource().setText(sResult);
+            }
+        }).placeAt("content");
+
+        // URL with regex matcher (deliberate fail)
+        new sap.m.Button({
+            text: "Regex test - fail",
+            press: function(oEvent) {
+                var oRes = jQuery.sap.sjax({
+                    url: "http://localhost/qmacro/customer/7zd8as/orders",
+                    dataType: "json"
+                });
+                var sResult = oRes.success ? "Customer was " + oRes.data.customer : "Call failed";
+                oEvent.getSource().setText(sResult);
+            }
+        }).placeAt("content");
+
+        </script>
+    </head>
+
+    <body class="sapUiBody" role="application">
+        <div id="content"></div>
+    </body>
+</html>

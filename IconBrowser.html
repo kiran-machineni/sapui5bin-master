@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta charset="UTF-8">
+
+        <title>SAPUI5 Icon Browser</title>
+
+        <script id="sap-ui-bootstrap" 
+                type="text/javascript"
+                src="/sapui5/latest/libs/resources/sap-ui-core.js"
+                data-sap-ui-theme="sap_bluecrystal"
+                data-sap-ui-libs="sap.m"
+        >
+        </script>
+
+        <script>
+
+        jQuery.sap.require("sap.ui.core.IconPool");
+
+        var oTileContainer = new sap.m.TileContainer({
+        	tiles: sap.ui.core.IconPool
+	   			.getIconNames()
+	   			.map(function(name) {
+					return new sap.m.StandardTile({
+						icon: sap.ui.core.IconPool.getIconURI(name),
+						title: name
+					});
+				})
+		});
+
+        var oAboutPopover = new sap.m.Popover("idAboutPopover", {
+            placement: sap.m.PlacementType.Bottom,
+            showHeader: true,
+            title: "About",
+            footer: new sap.m.Bar({
+                contentRight: [
+                    new sap.m.Button({
+                        text: "OK",
+                        press: function() {
+                            sap.ui.getCore().byId("idAboutPopover").close();
+                        }
+                    })
+                ]
+            }),
+            content: 
+                new sap.m.StandardTile({
+                    icon: sap.ui.core.IconPool.getIconURI("initiative"),
+                    title: "SAPUI5 Icon Browser",
+                    info: "press for source",
+                    press: function() {
+                        window.open("https://github.com/qmacro/sapui5bin/blob/master/IconBrowser.html");
+                    }
+                })
+    
+        });
+
+		new sap.m.App({
+			pages: [
+				new sap.m.Page({
+					enableScrolling: false,
+					showHeader: true,
+                    headerContent: [
+                        new sap.m.Button({
+                           icon: sap.ui.core.IconPool.getIconURI('initiative'),
+                           press: function() {
+                                oAboutPopover.openBy(this);
+                           }
+                        })
+                    ],
+					title: "SAPUI5 Icon Browser",
+					content: [ oTileContainer ]
+				})
+			]
+		}).placeAt("sapUiBody");
+
+        </script>
+    </head>
+
+    <body id="sapUiBody" role="application">
+    </body>
+</html>
